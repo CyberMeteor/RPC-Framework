@@ -24,18 +24,18 @@ public class Main {
 
     }
 
-    private static <T> T invoke(Long id) {
-        RpcClient rpcClient;
-
-        RpcReq req = RpcReq.builder()
-                .reqId("1213")
-                .interfaceName("com.alex.api.UserService")
-                .methodName("getUser")
-                .params(new Object[]{1L})
-                .paramTypes(new Class[]{Long.class})
-                .build();
-
-        RpcResp<?> rpcResp = rpcClient.sendReq(req);
-        return (T) rpcResp.getData();
-    }
+//    private static <T> T invoke(Long id) {
+//        RpcClient rpcClient;
+//
+//        RpcReq req = RpcReq.builder()
+//                .reqId("1213")
+//                .interfaceName("com.alex.api.UserService")
+//                .methodName("getUser")
+//                .params(new Object[]{1L})
+//                .paramTypes(new Class[]{Long.class})
+//                .build();
+//
+//        RpcResp<?> rpcResp = rpcClient.sendReq(req);
+//        return (T) rpcResp.getData();
+//    }
 }
