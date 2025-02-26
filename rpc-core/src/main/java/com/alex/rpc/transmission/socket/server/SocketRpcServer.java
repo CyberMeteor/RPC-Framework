@@ -41,12 +41,10 @@ public class SocketRpcServer implements RpcServer {
                 System.out.println(rpcReq);
 
                 // Pretending to call the method implemented by the interface in rpcReq
-                String data = "sfsdf12312";
-
-
+                Object data = invoke(rpcReq);
 
                 ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
-                RpcResp<String> rpcResp = RpcResp.success(rpcReq.getReqId(), data);
+                RpcResp<?> rpcResp = RpcResp.success(rpcReq.getReqId(), data);
                 outputStream.writeObject(rpcResp);
                 outputStream.flush();
             }

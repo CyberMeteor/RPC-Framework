@@ -1,5 +1,6 @@
 package com.alex.rpc.dto;
 
+import cn.hutool.core.util.StrUtil;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -24,6 +25,8 @@ public class RpcReq implements Serializable {
 
 
     public String rpcServiceName() {
-        return getInterfaceName() + getVersion() + getGroup();
+        return getInterfaceName()
+                + StrUtil.blankToDefault(getVersion(), StrUtil.EMPTY)
+                +  StrUtil.blankToDefault(getGroup(), StrUtil.EMPTY);
     }
 }
