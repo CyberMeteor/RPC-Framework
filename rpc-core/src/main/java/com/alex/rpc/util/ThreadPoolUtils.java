@@ -89,4 +89,28 @@ public final class ThreadPoolUtils {
 
         return threadFactoryBuilder.setNamePrefix(poolName).build();
     }
+
+    public static void shutdownAll() {
+        THREAD_POOL_CACHE.entrySet().parallelStream()
+                .forEach(entry -> {
+                    String poolName = entry.getKey();
+                    ExecutorService executorService = entry.getValue();
+
+                    executorService.shutdown();
+
+                    log.info("start shutdown thread pool: {}", poolName);
+
+                    try {
+                        if (executorService.awaitTermination(10, TimeUnit.SECONDS)) {
+                            log.info("{} thread pool has been shutdown", poolName);
+                        }  else {
+                            log.info("{} thread pool is not shutdown in 10 seconds, forcing it to shutdown", poolName);
+                            executorService.shutdownNow();
+                        }
+                    } catch (InterruptedException e) {
+                        log.error("Exceptions occurred when stopping {} thread pool ", poolName);
+                        executorService.shutdownNow();
+                    }
+                });
+    }
 }
