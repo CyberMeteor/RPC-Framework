@@ -71,6 +71,8 @@ public final class ThreadPoolUtils {
                  createThreadFactory(poolName, isDaemon)
         );
 
+        log.debug("Create thread pool {}", poolName);
+
         THREAD_POOL_CACHE.put(poolName, executorService);
         return executorService;
     }

@@ -7,6 +7,7 @@ import com.alex.rpc.handler.RpcReqHandler;
 import com.alex.rpc.provider.ServiceProvider;
 import com.alex.rpc.provider.impl.SimpleServiceProvider;
 import com.alex.rpc.transmission.RpcServer;
+import com.alex.rpc.util.ThreadPoolUtils;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
@@ -15,12 +16,14 @@ import java.io.ObjectOutputStream;
 import java.lang.reflect.Method;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
 
 @Slf4j
 public class SocketRpcServer implements RpcServer {
     private final int port;
     private final RpcReqHandler rpcReqHandler;
     private final ServiceProvider serviceProvider;
+    private final ExecutorService executor;
 
     public SocketRpcServer(int port) {
         this(port, new SimpleServiceProvider());
@@ -30,6 +33,7 @@ public class SocketRpcServer implements RpcServer {
         this.port = port;
         this.serviceProvider = serviceProvider;
         this.rpcReqHandler = new RpcReqHandler(serviceProvider);
+        this.executor = ThreadPoolUtils.createIoIntensiveThreadPool("socket-rpc-server-");
     }
 
     @Override
@@ -39,17 +43,7 @@ public class SocketRpcServer implements RpcServer {
 
             Socket socket;
             while ((socket = serverSocket.accept()) != null) {
-                ObjectInputStream inputStream = new ObjectInputStream(socket.getInputStream());
-                RpcReq rpcReq = (RpcReq) inputStream.readObject();
-                System.out.println(rpcReq);
-
-                // Pretending to call the method implemented by the interface in rpcReq
-                Object data = rpcReqHandler.invoke(rpcReq);
-
-                ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
-                RpcResp<?> rpcResp = RpcResp.success(rpcReq.getReqId(), data);
-                outputStream.writeObject(rpcResp);
-                outputStream.flush();
+                executor.submit(new SocketReqHandler(socket, rpcReqHandler));
             }
         } catch (Exception e) {
             log.error("Server error!", e);

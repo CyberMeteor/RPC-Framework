@@ -6,6 +6,9 @@ import com.alex.rpc.dto.RpcReq;
 import com.alex.rpc.dto.RpcResp;
 import com.alex.rpc.transmission.RpcClient;
 import com.alex.rpc.transmission.socket.client.SocketRpcClient;
+import com.alex.rpc.util.ThreadPoolUtils;
+
+import java.util.concurrent.ExecutorService;
 
 public class Main {
     public static void main(String[] args) {
@@ -29,9 +32,17 @@ public class Main {
                 .paramTypes(new Class[]{Long.class})
                 .build();
 
+
+//        ExecutorService threadPool = ThreadPoolUtils.createIoIntensiveThreadPool("test");
+//        for (int i = 0; i < 10; i++) {
+//            threadPool.submit(() -> {
+//                RpcResp<?> rpcResp = rpcClient.sendReq(req);
+//                System.out.println(rpcResp.getData());
+//            });
+//        }
+
         RpcResp<?> rpcResp = rpcClient.sendReq(req);
         System.out.println(rpcResp.getData());
-
     }
 
 //    private static <T> T invoke(Long id) {
