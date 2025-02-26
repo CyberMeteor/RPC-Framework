@@ -1,4 +1,4 @@
-package com.alex.server;
+package com.alex.server.service;
 
 import cn.hutool.core.util.IdUtil;
 import com.alex.api.User;

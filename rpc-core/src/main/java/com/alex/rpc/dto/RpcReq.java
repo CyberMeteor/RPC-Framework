@@ -15,10 +15,10 @@ public class RpcReq implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private String reqId;
-    private  String InterfaceName;
+    private  String interfaceName;
     private String methodName;
-    private Class<?>[] parameterTypes;
-    private Object[] parameters;
+    private Class<?>[] paramTypes;
+    private Object[] params;
     private String version;
     private String group;
 }
