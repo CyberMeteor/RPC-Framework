@@ -21,8 +21,9 @@ public class RpcResp<T> implements Serializable {
     private T data;
 
 
-    public static <T> RpcResp<T> success(T data) {
+    public static <T> RpcResp<T> success(String reqId, T data) {
         RpcResp<T> resp = new RpcResp<T>();
+        resp.setReqId(reqId);
         resp.setCode(0);
         resp.setData(data);
 
