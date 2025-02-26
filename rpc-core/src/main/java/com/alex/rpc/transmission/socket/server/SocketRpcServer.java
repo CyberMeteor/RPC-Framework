@@ -12,9 +12,17 @@ import java.net.Socket;
 
 @Slf4j
 public class SocketRpcServer implements RpcServer {
+    private final int port;
+
+    public SocketRpcServer(int port) {
+        this.port = port;
+    }
+
     @Override
     public void start() {
-        try (ServerSocket serverSocket = new ServerSocket(8888)) {
+        try (ServerSocket serverSocket = new ServerSocket(port)) {
+            log.info("Server started on port {}", port);
+
             Socket socket;
             while ((socket = serverSocket.accept()) != null) {
                 ObjectInputStream inputStream = new ObjectInputStream(socket.getInputStream());
