@@ -1,6 +1,7 @@
 package com.alex.rpc.transmission.socket.server;
 
 import com.alex.rpc.config.RpcServiceConfig;
+import com.alex.rpc.constant.RpcConstant;
 import com.alex.rpc.dto.RpcReq;
 import com.alex.rpc.dto.RpcResp;
 import com.alex.rpc.handler.RpcReqHandler;
@@ -24,6 +25,10 @@ public class SocketRpcServer implements RpcServer {
     private final RpcReqHandler rpcReqHandler;
     private final ServiceProvider serviceProvider;
     private final ExecutorService executor;
+
+    public SocketRpcServer() {
+        this(RpcConstant.SERVER_PORT);
+    }
 
     public SocketRpcServer(int port) {
         this(port, new SimpleServiceProvider());
