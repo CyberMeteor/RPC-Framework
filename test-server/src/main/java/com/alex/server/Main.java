@@ -10,16 +10,12 @@ import com.alex.server.service.UserServiceImpl;
 
 public class Main {
     public static void main(String[] args) {
-//        RpcServiceConfig config = new RpcServiceConfig(new UserServiceImpl());
-//
-//        RpcServer rpcServer = new SocketRpcServer(8888);
-//        rpcServer.publishService(config);
-//
-//        rpcServer.start();
+        RpcServiceConfig config = new RpcServiceConfig(new UserServiceImpl());
 
-        RpcClientProxy rpcClientProxy = new RpcClientProxy(new UserServiceImpl());
-        UserService userService = rpcClientProxy.getProxy();
-        User user = userService.getUser(1L);
-        System.out.println(user);
+        RpcServer rpcServer = new SocketRpcServer(8888);
+        rpcServer.publishService(config);
+
+        rpcServer.start();
+
     }
 }
