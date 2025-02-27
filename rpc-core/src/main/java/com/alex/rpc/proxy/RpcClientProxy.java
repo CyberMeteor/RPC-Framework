@@ -59,7 +59,7 @@ public class RpcClientProxy implements InvocationHandler {
             throw new RuntimeException("rpcResp is null");
         }
 
-        if (Objects.equals(rpcReq.getReqId(), rpcResp.getReqId())) {
+        if (!Objects.equals(rpcReq.getReqId(), rpcResp.getReqId())) {
             throw new RuntimeException("Request id is different from response id");
         }
 
