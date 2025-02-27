@@ -1,38 +1,48 @@
 package com.alex;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import lombok.SneakyThrows;
+import org.apache.curator.RetryPolicy;
+import org.apache.curator.framework.CuratorFramework;
+import org.apache.curator.framework.CuratorFrameworkFactory;
+import org.apache.curator.retry.ExponentialBackoffRetry;
+import org.apache.zookeeper.CreateMode;
+import org.apache.zookeeper.data.Stat;
 
 /**
  * Unit test for simple App.
  */
-public class AppTest 
-    extends TestCase
-{
-    /**
-     * Create the test case
-     *
-     * @param testName name of the test case
-     */
-    public AppTest( String testName )
-    {
-        super( testName );
-    }
+public class AppTest {
+    @SneakyThrows
+    public static void main(String[] args) {
 
-    /**
-     * @return the suite of tests being tested
-     */
-    public static Test suite()
-    {
-        return new TestSuite( AppTest.class );
-    }
+        // Reset strategy
+        RetryPolicy retryPolicy = new ExponentialBackoffRetry(1000, 3);
 
-    /**
-     * Rigourous Test :-)
-     */
-    public void testApp()
-    {
-        assertTrue( true );
+        CuratorFramework zkClient = CuratorFrameworkFactory.builder()
+                // Server List
+                .connectString("localhost:2181")
+                .retryPolicy(retryPolicy)
+                .build();
+
+        zkClient.start();
+
+        // When the parent node does not exist, it will automatically create a parent node. It is more recommended to use it
+        zkClient.create()
+                .creatingParentsIfNeeded()
+                .withMode(CreateMode.PERSISTENT)
+                .forPath("/node1/00002","test1".getBytes());
+
+        Stat stat = zkClient.checkExists().forPath("/node1/00002");
+        System.out.println(stat != null);
+
+        byte[] bytes = zkClient.getData().forPath("/node1/00002");
+        System.out.println(new String(bytes));
+
+        zkClient.setData().forPath("/node1/00002","test2".getBytes());
+
+        bytes = zkClient.getData().forPath("/node1/00002");
+        System.out.println(new String(bytes));
+
+        zkClient.delete().deletingChildrenIfNeeded().forPath("/node1");
     }
 }
