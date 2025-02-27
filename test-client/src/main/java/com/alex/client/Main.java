@@ -16,12 +16,6 @@ public class Main {
 //        User user = userService.getUser(1L);
 //        System.out.println(user);
 
-//        RpcClient rpcClient = new RpcClient() {
-//            @Override
-//            public RpcResp<?> sendReq(RpcReq req) {
-//                return null;
-//            }
-//        };
         RpcClient rpcClient = new SocketRpcClient("127.0.0.1", 8888);
 
         RpcReq req = RpcReq.builder()
@@ -44,8 +38,4 @@ public class Main {
         RpcResp<?> rpcResp = rpcClient.sendReq(req);
         System.out.println(rpcResp.getData());
     }
-
-//    private static <T> T invoke(Long id) {
-//
-//    }
 }
