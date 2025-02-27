@@ -4,8 +4,7 @@ import lombok.SneakyThrows;
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
-import org.apache.curator.framework.recipes.cache.NodeCache;
-import org.apache.curator.framework.recipes.cache.NodeCacheListener;
+import org.apache.curator.framework.recipes.cache.*;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.data.Stat;
@@ -47,22 +46,41 @@ public class AppTest {
 //
 //        zkClient.delete().deletingChildrenIfNeeded().forPath("/node1");
 
-        String path = "/n1";
+//        String path = "/n1";
+//
+//        NodeCache nodeCache = new NodeCache(zkClient, path);
+//
+//        // register
+//        NodeCacheListener listener = () -> {
+//            if (nodeCache.getCurrentData() != null) {
+//                String data = new String(nodeCache.getCurrentData().getData());
+//                System.out.println("node data changed: " + data);
+//            } else {
+//                System.out.println("node deleted");
+//            }
+//        };
+//        nodeCache.getListenable().addListener(listener);
+//
+//        nodeCache.start();
+//
+//        System.in.read();
 
-        NodeCache nodeCache = new NodeCache(zkClient, path);
+        String path = "/node1";
 
-        // register
-        NodeCacheListener listener = () -> {
-            if (nodeCache.getCurrentData() != null) {
-                String data = new String(nodeCache.getCurrentData().getData());
-                System.out.println("node data changed: " + data);
-            } else {
-                System.out.println("node deleted");
+        PathChildrenCache pathChildrenCache = new PathChildrenCache(zkClient, path, true);
+
+        PathChildrenCacheListener pathChildrenCacheListener = (curatorFramework, pathChildrenCacheEvent) -> {
+            if (pathChildrenCacheEvent.getType() == PathChildrenCacheEvent.Type.CHILD_REMOVED) {
+                System.out.println("child node removed");
+            } else if (pathChildrenCacheEvent.getType() == PathChildrenCacheEvent.Type.CHILD_ADDED) {
+                System.out.println("child node added");
+            } else if (pathChildrenCacheEvent.getType() == PathChildrenCacheEvent.Type.CHILD_UPDATED) {
+                System.out.println("child node updated");
             }
         };
-        nodeCache.getListenable().addListener(listener);
 
-        nodeCache.start();
+        pathChildrenCache.getListenable().addListener(pathChildrenCacheListener);
+        pathChildrenCache.start();
 
         System.in.read();
     }
