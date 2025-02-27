@@ -4,6 +4,8 @@ import lombok.SneakyThrows;
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
+import org.apache.curator.framework.recipes.cache.NodeCache;
+import org.apache.curator.framework.recipes.cache.NodeCacheListener;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.data.Stat;
@@ -27,22 +29,41 @@ public class AppTest {
         zkClient.start();
 
         // When the parent node does not exist, it will automatically create a parent node. It is more recommended to use it
-        zkClient.create()
-                .creatingParentsIfNeeded()
-                .withMode(CreateMode.PERSISTENT)
-                .forPath("/node1/00002","test1".getBytes());
+//        zkClient.create()
+//                .creatingParentsIfNeeded()
+//                .withMode(CreateMode.PERSISTENT)
+//                .forPath("/node1/00002","test1".getBytes());
+//
+//        Stat stat = zkClient.checkExists().forPath("/node1/00002");
+//        System.out.println(stat != null);
+//
+//        byte[] bytes = zkClient.getData().forPath("/node1/00002");
+//        System.out.println(new String(bytes));
+//
+//        zkClient.setData().forPath("/node1/00002","test2".getBytes());
+//
+//        bytes = zkClient.getData().forPath("/node1/00002");
+//        System.out.println(new String(bytes));
+//
+//        zkClient.delete().deletingChildrenIfNeeded().forPath("/node1");
 
-        Stat stat = zkClient.checkExists().forPath("/node1/00002");
-        System.out.println(stat != null);
+        String path = "/n1";
 
-        byte[] bytes = zkClient.getData().forPath("/node1/00002");
-        System.out.println(new String(bytes));
+        NodeCache nodeCache = new NodeCache(zkClient, path);
 
-        zkClient.setData().forPath("/node1/00002","test2".getBytes());
+        // register
+        NodeCacheListener listener = () -> {
+            if (nodeCache.getCurrentData() != null) {
+                String data = new String(nodeCache.getCurrentData().getData());
+                System.out.println("node data changed: " + data);
+            } else {
+                System.out.println("node deleted");
+            }
+        };
+        nodeCache.getListenable().addListener(listener);
 
-        bytes = zkClient.getData().forPath("/node1/00002");
-        System.out.println(new String(bytes));
+        nodeCache.start();
 
-        zkClient.delete().deletingChildrenIfNeeded().forPath("/node1");
+        System.in.read();
     }
 }
