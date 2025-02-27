@@ -4,9 +4,11 @@ import com.alex.rpc.config.RpcServiceConfig;
 import com.alex.rpc.constant.RpcConstant;
 import com.alex.rpc.dto.RpcReq;
 import com.alex.rpc.dto.RpcResp;
+import com.alex.rpc.factory.SingletonFactory;
 import com.alex.rpc.handler.RpcReqHandler;
 import com.alex.rpc.provider.ServiceProvider;
 import com.alex.rpc.provider.impl.SimpleServiceProvider;
+import com.alex.rpc.provider.impl.ZkServiceProvider;
 import com.alex.rpc.transmission.RpcServer;
 import com.alex.rpc.util.ThreadPoolUtils;
 import lombok.SneakyThrows;
@@ -31,7 +33,7 @@ public class SocketRpcServer implements RpcServer {
     }
 
     public SocketRpcServer(int port) {
-        this(port, new SimpleServiceProvider());
+        this(port, SingletonFactory.getInstance(ZkServiceProvider.class));
     }
 
     public SocketRpcServer(int port, ServiceProvider serviceProvider) {
