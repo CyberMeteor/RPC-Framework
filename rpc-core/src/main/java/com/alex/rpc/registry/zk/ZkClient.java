@@ -2,11 +2,15 @@ package com.alex.rpc.registry.zk;
 
 import cn.hutool.core.util.StrUtil;
 import com.alex.rpc.constant.RpcConstant;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.retry.ExponentialBackoffRetry;
+import org.apache.zookeeper.CreateMode;
+
+import java.util.List;
 
 @Slf4j
 public class ZkClient {
@@ -30,5 +34,32 @@ public class ZkClient {
         log.info("Begin to connect to zookeeper....");
         this.client.start();
         log.info("zookeeper connect success");
+    }
+
+    @SneakyThrows
+    public void createPersistentNode(String path) {
+        if (StrUtil.isBlank(path)) {
+            throw new IllegalArgumentException("path is blank");
+        }
+
+        if (client.checkExists().forPath(path) != null) {
+            log.info("Zookeeper node already exists: {}", path);
+            return;
+        }
+
+        log.info("Creating Zookeeper node: {}", path);
+        client.create()
+                .creatingParentsIfNeeded()
+                .withMode(CreateMode.PERSISTENT)
+                .forPath(path);
+    }
+
+    @SneakyThrows
+    public List<String> getChildrenNode(String path) {
+        if (StrUtil.isBlank(path)) {
+            throw new IllegalArgumentException("path is blank");
+        }
+
+        return client.getChildren().forPath(path);
     }
 }
