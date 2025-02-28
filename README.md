@@ -1,6 +1,6 @@
 # RPC Framework
 
-A lightweight Java RPC framework implementing remote procedure call communication with service discovery and load balancing capabilities.
+A lightweight, modular RPC (Remote Procedure Call) framework in Java. This project demonstrates service registration, dynamic discovery, load balancing, and client-side proxying using both socket-based communication and ZooKeeper for distributed service management.
 
 ## Features
 
