@@ -6,8 +6,10 @@ import com.alex.rpc.factory.SingletonFactory;
 import com.alex.rpc.registry.ServiceRegistry;
 import com.alex.rpc.registry.zk.ZkClient;
 import com.alex.rpc.util.IPUtils;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
 @Slf4j
@@ -33,5 +35,13 @@ public class ZkServiceRegistry implements ServiceRegistry {
                 + IPUtils.toIpPort(address);
 
         zkClient.createPersistentNode(path);
+    }
+
+    @SneakyThrows
+    @Override
+    public void clearAll() {
+        String host = InetAddress.getLocalHost().getHostAddress();
+        int port = RpcConstant.SERVER_PORT;
+        zkClient.clearAll(new InetSocketAddress(host, port));
     }
 }

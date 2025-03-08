@@ -10,6 +10,7 @@ import com.alex.rpc.provider.ServiceProvider;
 import com.alex.rpc.provider.impl.SimpleServiceProvider;
 import com.alex.rpc.provider.impl.ZkServiceProvider;
 import com.alex.rpc.transmission.RpcServer;
+import com.alex.rpc.util.ShutdownHookUtils;
 import com.alex.rpc.util.ThreadPoolUtils;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -45,6 +46,8 @@ public class SocketRpcServer implements RpcServer {
 
     @Override
     public void start() {
+        ShutdownHookUtils.clearAll();
+
         try (ServerSocket serverSocket = new ServerSocket(port)) {
             log.info("Server started on port {}", port);
 
