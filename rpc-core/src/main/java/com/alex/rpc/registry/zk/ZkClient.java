@@ -11,12 +11,21 @@ import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.zookeeper.CreateMode;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 public class ZkClient {
     private static final int BASE_SLEEP_TIME = 1000;
     private static final int MAX_RETRIES = 3;
-    private CuratorFramework client;
+    private final CuratorFramework client;
+
+    //  /RPC-Framework/rpcServiceName/ip:port
+    private static final Map<String, List<String>> SERVICE_ADDRESS_CACHE = new ConcurrentHashMap<>();
+
+    // Key: /RPC-Framework/rpcServiceName  Value:childrenNode [ip:port]
+    private static final Set<String> SERVICE_ADDRESS_SET = ConcurrentHashMap.newKeySet();
 
     public ZkClient() {
         this(RpcConstant.ZK_IP, RpcConstant.ZK_PORT);
@@ -42,7 +51,13 @@ public class ZkClient {
             throw new IllegalArgumentException("path is blank");
         }
 
+        if (SERVICE_ADDRESS_SET.contains(path)) {
+            log.info("Zookeeper node already exists: {}", path);
+            return;
+        }
+
         if (client.checkExists().forPath(path) != null) {
+            SERVICE_ADDRESS_SET.add(path);
             log.info("Zookeeper node already exists: {}", path);
             return;
         }
@@ -60,6 +75,13 @@ public class ZkClient {
             throw new IllegalArgumentException("path is blank");
         }
 
-        return client.getChildren().forPath(path);
+        if (SERVICE_ADDRESS_CACHE.containsKey(path)) {
+            return SERVICE_ADDRESS_CACHE.get(path);
+        }
+
+        List<String> children = client.getChildren().forPath(path);
+        SERVICE_ADDRESS_CACHE.put(path, children);
+
+        return children;
     }
 }
