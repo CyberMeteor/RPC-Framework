@@ -9,9 +9,11 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
+import org.apache.log4j.BasicConfigurator;
 
 public class NettyServer {
     public static void main(String[] args) {
+        BasicConfigurator.configure();
         // Create a server startup bootstrap
         ServerBootstrap bootstrap = new ServerBootstrap();
 
