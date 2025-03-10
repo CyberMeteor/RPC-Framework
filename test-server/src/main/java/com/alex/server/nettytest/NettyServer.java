@@ -27,9 +27,9 @@ public class NettyServer {
         bootstrap.childHandler(new ChannelInitializer<NioSocketChannel>() {
             @Override
             protected void initChannel(NioSocketChannel ch) throws Exception {
-                // Add string decoder
+                // Add string decoder (Byte -> Object)
                 ch.pipeline().addLast(new StringDecoder());
-                // Add string encoder
+                // Add string encoder (Object -> Byte)
                 ch.pipeline().addLast(new StringEncoder());
 
                 // Add custom business logic processing
