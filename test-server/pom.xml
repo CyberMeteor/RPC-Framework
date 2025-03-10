@@ -30,6 +30,10 @@
             <artifactId>zookeeper</artifactId>
             <version>3.5.4-beta</version>
         </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-all</artifactId>
+        </dependency>
     </dependencies>
 
 </project>
