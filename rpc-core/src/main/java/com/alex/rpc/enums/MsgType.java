@@ -16,4 +16,8 @@ public enum MsgType {
 
     private final byte code;
     private final String desc;
+
+    public boolean isHeartbeat() {
+        return this == HEARTBEAT_REQ || this == HEARTBEAT_RESP;
+    }
 }
