@@ -8,4 +8,5 @@ public class RpcConstant {
     public static final String ZK_RPC_ROOT_PATH = "/RPC-Framework";
 
     public static final String NETTY_RPC_KEY = "RpcResp";
+    public static final byte[] RPC_MAGIC_CODE = new byte[]{(byte) 'r', (byte) 'p', (byte) 'c', (byte) 'f'};
 }

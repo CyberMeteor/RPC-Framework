@@ -19,7 +19,7 @@ public class RpcMsg implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private Integer reqId;
-    private VersionType versionType;
+    private VersionType version;
     private MsgType msgType;
     private SerializeType serializeType;
     private CompressType compressType;
