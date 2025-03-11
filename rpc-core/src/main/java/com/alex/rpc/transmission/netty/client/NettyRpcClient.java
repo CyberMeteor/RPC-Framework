@@ -7,6 +7,7 @@ import com.alex.rpc.transmission.RpcClient;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
@@ -27,9 +28,9 @@ public class NettyRpcClient implements RpcClient {
                 .channel(NioSocketChannel.class)
                 .handler(new LoggingHandler(LogLevel.INFO))
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS,  DEFAULT_CONNECT_TIMEOUT)
-                .handler(new ChannelInitializer<NioSocketChannel>() {
+                .handler(new ChannelInitializer<SocketChannel>() {
                     @Override
-                    protected void initChannel(NioSocketChannel channel) throws Exception {
+                    protected void initChannel(SocketChannel channel) throws Exception {
                         channel.pipeline().addLast(new StringDecoder());
                         channel.pipeline().addLast(new StringEncoder());
                         channel.pipeline().addLast(new NettyRpcClientHandler());
@@ -41,17 +42,22 @@ public class NettyRpcClient implements RpcClient {
     @SneakyThrows
     @Override
     public RpcResp<?> sendReq(RpcReq req) {
-        ChannelFuture channelFuture = bootstrap.connect("127.0.0.1", 8888).sync();
+        ChannelFuture channelFuture = bootstrap.connect("127.0.0.1", RpcConstant.SERVER_PORT).sync();
+
+        log.info("NettyRpcClient connected to XXX");
 
         Channel channel = channelFuture.channel();
-        channel.writeAndFlush(req).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
+        String interfaceName = req.getInterfaceName();
+        channel.writeAndFlush(interfaceName).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
 
         // Block and wait until it is closed
         channel.closeFuture().sync();
 
         // Obtain data from server
-        AttributeKey<RpcResp<?>> key = AttributeKey.valueOf(RpcConstant.NETTY_RPC_KEY);
+        AttributeKey<String> key = AttributeKey.valueOf(RpcConstant.NETTY_RPC_KEY);
 
-        return channel.attr(key).get();
+        String s = channel.attr(key).get();
+        System.out.println(s);
+        return null;
     }
 }

@@ -8,11 +8,11 @@ import io.netty.util.AttributeKey;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class NettyRpcClientHandler extends SimpleChannelInboundHandler<RpcResp<?>> {
+public class NettyRpcClientHandler extends SimpleChannelInboundHandler<String> {
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, RpcResp<?> rpcResp) throws Exception {
+    protected void channelRead0(ChannelHandlerContext ctx, String rpcResp) throws Exception {
         log.debug("Received RpcResp data: {}", rpcResp);
-        AttributeKey<RpcResp<?>> key = AttributeKey.valueOf(RpcConstant.NETTY_RPC_KEY);
+        AttributeKey<String> key = AttributeKey.valueOf(RpcConstant.NETTY_RPC_KEY);
         ctx.channel().attr(key).set(rpcResp);
         ctx.channel().close();
     }

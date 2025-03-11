@@ -7,6 +7,7 @@ import com.alex.rpc.dto.RpcReq;
 import com.alex.rpc.dto.RpcResp;
 import com.alex.rpc.proxy.RpcClientProxy;
 import com.alex.rpc.transmission.RpcClient;
+import com.alex.rpc.transmission.netty.client.NettyRpcClient;
 import com.alex.rpc.transmission.socket.client.SocketRpcClient;
 import com.alex.rpc.util.ThreadPoolUtils;
 
@@ -15,14 +16,17 @@ import java.util.concurrent.Executors;
 
 public class Main {
     public static void main(String[] args) {
-        UserService userService = ProxyUtils.getProxy(UserService.class);
+//        UserService userService = ProxyUtils.getProxy(UserService.class);
+//
+//        ExecutorService executorService = Executors.newFixedThreadPool(10);
+//        for (int i = 0; i < 30; i++) {
+//            executorService.execute(() -> {
+//                User user = userService.getUser(1L);
+//                System.out.println(user);
+//            });
+//        }
 
-        ExecutorService executorService = Executors.newFixedThreadPool(10);
-        for (int i = 0; i < 30; i++) {
-            executorService.execute(() -> {
-                User user = userService.getUser(1L);
-                System.out.println(user);
-            });
-        }
+        NettyRpcClient rpcClient = new NettyRpcClient();
+        rpcClient.sendReq(RpcReq.builder().interfaceName("request data").build());
     }
 }
