@@ -32,7 +32,7 @@ public class NettyRpcClient implements RpcClient {
                     protected void initChannel(NioSocketChannel channel) throws Exception {
                         channel.pipeline().addLast(new StringDecoder());
                         channel.pipeline().addLast(new StringEncoder());
-                        // channel.pipeline().addLast(new );
+                        channel.pipeline().addLast(new NettyRpcClientHandler());
                     }
                 });
     }
