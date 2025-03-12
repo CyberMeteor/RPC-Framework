@@ -22,7 +22,6 @@ public class SocketReqHandler implements Runnable {
     public void run() {
         ObjectInputStream inputStream = new ObjectInputStream(socket.getInputStream());
         RpcReq rpcReq = (RpcReq) inputStream.readObject();
-        System.out.println(rpcReq);
 
         Object data = rpcReqHandler.invoke(rpcReq);
 

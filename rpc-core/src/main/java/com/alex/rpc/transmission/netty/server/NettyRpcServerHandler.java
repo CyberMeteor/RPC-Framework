@@ -7,6 +7,9 @@ import com.alex.rpc.enums.CompressType;
 import com.alex.rpc.enums.MsgType;
 import com.alex.rpc.enums.SerializeType;
 import com.alex.rpc.enums.VersionType;
+import com.alex.rpc.factory.SingletonFactory;
+import com.alex.rpc.handler.RpcReqHandler;
+import com.alex.rpc.provider.ServiceProvider;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -14,6 +17,12 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class NettyRpcServerHandler extends SimpleChannelInboundHandler<RpcMsg> {
+    private final RpcReqHandler rpcReqHandler;
+
+    public NettyRpcServerHandler(ServiceProvider serviceProvider) {
+        this.rpcReqHandler = new RpcReqHandler(serviceProvider);
+    }
+
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, RpcMsg rpcMsg) throws Exception {
         log.debug("Receive request: {}", rpcMsg);
@@ -26,7 +35,7 @@ public class NettyRpcServerHandler extends SimpleChannelInboundHandler<RpcMsg> {
         } else {
             msgType = MsgType.RPC_RESP;
             RpcReq rpcReq = (RpcReq) rpcMsg.getData();
-            data = RpcResp.success(rpcReq.getReqId(), "Simulated response data");
+            data = handleRpcReq(rpcReq);
         }
 
         RpcMsg msg = RpcMsg.builder()
@@ -47,5 +56,15 @@ public class NettyRpcServerHandler extends SimpleChannelInboundHandler<RpcMsg> {
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         log.error("Server Exception", cause);
         ctx.close();
+    }
+
+    private RpcResp<?> handleRpcReq(RpcReq rpcReq) {
+        try {
+            Object object = rpcReqHandler.invoke(rpcReq);
+            return RpcResp.success(rpcReq.getReqId(),  object);
+        } catch (Exception e) {
+            log.info("Fail to invoke RpcReqHandler, ", e);
+            return RpcResp.fail(rpcReq.getReqId(),   e.getMessage());
+        }
     }
 }

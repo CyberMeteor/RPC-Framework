@@ -58,7 +58,7 @@ public class NettyRpcServer implements RpcServer {
                         protected void initChannel(SocketChannel channel) throws Exception {
                             channel.pipeline().addLast(new NettyRpcEncoder());
                             channel.pipeline().addLast(new NettyRpcDecoder());
-                            channel.pipeline().addLast(new NettyRpcServerHandler());
+                            channel.pipeline().addLast(new NettyRpcServerHandler(serviceProvider));
                         }
                     });
 
