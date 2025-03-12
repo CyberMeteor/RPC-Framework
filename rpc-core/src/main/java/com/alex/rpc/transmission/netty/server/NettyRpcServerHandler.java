@@ -1,5 +1,6 @@
 package com.alex.rpc.transmission.netty.server;
 
+import com.alex.rpc.dto.RpcMsg;
 import com.alex.rpc.dto.RpcReq;
 import com.alex.rpc.dto.RpcResp;
 import io.netty.channel.ChannelFutureListener;
@@ -8,14 +9,16 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class NettyRpcServerHandler extends SimpleChannelInboundHandler<String> {
+public class NettyRpcServerHandler extends SimpleChannelInboundHandler<RpcMsg> {
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, String str) throws Exception {
-        log.debug("Receive request: {}", str);
+    protected void channelRead0(ChannelHandlerContext ctx, RpcMsg rpcMsg) throws Exception {
+        log.debug("Receive request: {}", rpcMsg);
 
-//        RpcResp<String> rpcResp = RpcResp.success(str, "Simulated response data");
+        RpcReq rpcReq = (RpcReq) rpcMsg.getData();
+
+        RpcResp<String> rpcResp = RpcResp.success(rpcReq.getReqId(), "Simulated response data");
         ctx.channel()
-                .writeAndFlush("Simulated response data")
+                .writeAndFlush(rpcResp)
                 .addListener(ChannelFutureListener.CLOSE);
     }
 
