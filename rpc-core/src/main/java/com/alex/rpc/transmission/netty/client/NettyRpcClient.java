@@ -8,6 +8,9 @@ import com.alex.rpc.enums.CompressType;
 import com.alex.rpc.enums.MsgType;
 import com.alex.rpc.enums.SerializeType;
 import com.alex.rpc.enums.VersionType;
+import com.alex.rpc.factory.SingletonFactory;
+import com.alex.rpc.registry.ServiceDiscovery;
+import com.alex.rpc.registry.impl.ZkServiceDiscovery;
 import com.alex.rpc.transmission.RpcClient;
 import com.alex.rpc.transmission.netty.codec.NettyRpcDecoder;
 import com.alex.rpc.transmission.netty.codec.NettyRpcEncoder;
@@ -24,6 +27,7 @@ import io.netty.util.AttributeKey;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
+import java.net.InetSocketAddress;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
@@ -31,6 +35,16 @@ public class NettyRpcClient implements RpcClient {
     private static final Bootstrap bootstrap;
     private static final int DEFAULT_CONNECT_TIMEOUT = 5000;
     private static final AtomicInteger ID_GEN = new AtomicInteger(0);
+
+    private final ServiceDiscovery serviceDiscovery;
+
+    public NettyRpcClient() {
+        this(SingletonFactory.getInstance(ZkServiceDiscovery.class));
+    }
+
+    public NettyRpcClient(ServiceDiscovery serviceDiscovery) {
+        this.serviceDiscovery = serviceDiscovery;
+    }
 
     static {
         bootstrap = new Bootstrap();
@@ -52,9 +66,10 @@ public class NettyRpcClient implements RpcClient {
     @SneakyThrows
     @Override
     public RpcResp<?> sendReq(RpcReq req) {
-        ChannelFuture channelFuture = bootstrap.connect("127.0.0.1", RpcConstant.SERVER_PORT).sync();
+        InetSocketAddress address = serviceDiscovery.lookupService(req);
+        ChannelFuture channelFuture = bootstrap.connect(address).sync();
 
-        log.info("NettyRpcClient connected to XXX");
+        log.info("NettyRpcClient connected to: {}", address);
 
         Channel channel = channelFuture.channel();
 

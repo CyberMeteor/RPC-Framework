@@ -9,12 +9,14 @@ import com.alex.rpc.registry.ServiceRegistry;
 import com.alex.rpc.registry.impl.ZkServiceRegistry;
 import com.alex.rpc.transmission.socket.server.SocketRpcServer;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 public class ZkServiceProvider implements ServiceProvider {
     private final Map<String, Object> SERVICE_CACHE = new HashMap<>();
     private final ServiceRegistry serviceRegistry;
@@ -53,6 +55,7 @@ public class ZkServiceProvider implements ServiceProvider {
 
         InetSocketAddress address = new InetSocketAddress(host, port);
         serviceRegistry.registerService(rpcServiceName, address);
+        log.info("Register rpc service: {}, address: {}", rpcServiceName, address);
 
         SERVICE_CACHE.put(rpcServiceName, service);
     }

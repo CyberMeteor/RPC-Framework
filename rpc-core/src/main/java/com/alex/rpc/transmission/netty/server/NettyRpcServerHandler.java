@@ -18,17 +18,24 @@ public class NettyRpcServerHandler extends SimpleChannelInboundHandler<RpcMsg> {
     protected void channelRead0(ChannelHandlerContext ctx, RpcMsg rpcMsg) throws Exception {
         log.debug("Receive request: {}", rpcMsg);
 
-        RpcReq rpcReq = (RpcReq) rpcMsg.getData();
-
-        RpcResp<String> rpcResp = RpcResp.success(rpcReq.getReqId(), "Simulated response data");
+        MsgType msgType;
+        Object data;
+        if (rpcMsg.getMsgType().isHeartbeat()) {
+            msgType = MsgType.HEARTBEAT_RESP;
+            data = null;
+        } else {
+            msgType = MsgType.RPC_RESP;
+            RpcReq rpcReq = (RpcReq) rpcMsg.getData();
+            data = RpcResp.success(rpcReq.getReqId(), "Simulated response data");
+        }
 
         RpcMsg msg = RpcMsg.builder()
                 .reqId(rpcMsg.getReqId())
                 .version(VersionType.VERSION1)
-                .msgType(MsgType.RPC_RESP)
+                .msgType(msgType)
                 .compressType(CompressType.GZIP)
                 .serializeType(SerializeType.KRYO)
-                .data(rpcResp)
+                .data(data)
                 .build();
 
         ctx.channel()

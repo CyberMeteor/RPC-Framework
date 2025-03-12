@@ -16,17 +16,8 @@ import java.util.concurrent.Executors;
 
 public class Main {
     public static void main(String[] args) {
-//        UserService userService = ProxyUtils.getProxy(UserService.class);
-//
-//        ExecutorService executorService = Executors.newFixedThreadPool(10);
-//        for (int i = 0; i < 30; i++) {
-//            executorService.execute(() -> {
-//                User user = userService.getUser(1L);
-//                System.out.println(user);
-//            });
-//        }
-
-        NettyRpcClient rpcClient = new NettyRpcClient();
-        RpcResp<?> rpcResp = rpcClient.sendReq(RpcReq.builder().interfaceName("request data").build());
+        UserService userService = ProxyUtils.getProxy(UserService.class);
+        User user = userService.getUser(1L);
+        System.out.println(user);
     }
 }

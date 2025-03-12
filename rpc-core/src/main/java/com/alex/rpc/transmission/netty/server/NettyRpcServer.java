@@ -2,9 +2,13 @@ package com.alex.rpc.transmission.netty.server;
 
 import com.alex.rpc.config.RpcServiceConfig;
 import com.alex.rpc.constant.RpcConstant;
+import com.alex.rpc.factory.SingletonFactory;
+import com.alex.rpc.provider.ServiceProvider;
+import com.alex.rpc.provider.impl.ZkServiceProvider;
 import com.alex.rpc.transmission.RpcServer;
 import com.alex.rpc.transmission.netty.codec.NettyRpcDecoder;
 import com.alex.rpc.transmission.netty.codec.NettyRpcEncoder;
+import com.alex.rpc.util.ShutdownHookUtils;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -20,6 +24,26 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class NettyRpcServer implements RpcServer {
+    private final ServiceProvider serviceProvider;
+    private final int port;
+
+    public NettyRpcServer() {
+        this(RpcConstant.SERVER_PORT);
+    }
+
+    public NettyRpcServer(int port) {
+        this(SingletonFactory.getInstance(ZkServiceProvider.class), port);
+    }
+
+    public NettyRpcServer(ServiceProvider serviceProvider) {
+        this(serviceProvider, RpcConstant.SERVER_PORT);
+    }
+
+    public NettyRpcServer(ServiceProvider serviceProvider, int port) {
+        this.serviceProvider = serviceProvider;
+        this.port = port;
+    }
+
     @Override
     public void start() {
         EventLoopGroup bossGroup = new NioEventLoopGroup();
@@ -38,8 +62,9 @@ public class NettyRpcServer implements RpcServer {
                         }
                     });
 
-            ChannelFuture channelFuture = bootstrap.bind(RpcConstant.SERVER_PORT).sync();
-            log.info("NettyRpcServer started on port:{}", RpcConstant.SERVER_PORT);
+            ShutdownHookUtils.clearAll();
+            ChannelFuture channelFuture = bootstrap.bind(port).sync();
+            log.info("NettyRpcServer started on port:{}", port);
             channelFuture.channel().closeFuture().sync();
         } catch (InterruptedException e) {
             log.error("Server error.", e);
@@ -51,6 +76,6 @@ public class NettyRpcServer implements RpcServer {
 
     @Override
     public void publishService(RpcServiceConfig config) {
-
+        serviceProvider.publishService(config);
     }
 }
