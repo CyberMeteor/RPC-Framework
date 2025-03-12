@@ -20,18 +20,17 @@ public class NettyRpcEncoder extends MessageToByteEncoder<RpcMsg> {
     @Override
     protected void encode(ChannelHandlerContext ctx, RpcMsg rpcMsg, ByteBuf byteBuf) throws Exception {
         byteBuf.writeBytes(RpcConstant.RPC_MAGIC_CODE);
-        byte version = rpcMsg.getVersion().getCode();
-        byteBuf.writeByte(version);
+        byteBuf.writeByte(rpcMsg.getVersion().getCode());
 
         // Move 4 bits to the right to make room for datagram
-        byteBuf.writerIndex(byteBuf.writerIndex() + 1);
+        byteBuf.writerIndex(byteBuf.writerIndex() + 4);
 
         byteBuf.writeByte(rpcMsg.getMsgType().getCode());
         byteBuf.writeByte(rpcMsg.getSerializeType().getCode());
         byteBuf.writeByte(rpcMsg.getCompressType().getCode());
         byteBuf.writeInt(rpcMsg.getReqId());
 
-        int msgLen = RpcConstant.RPC_HEAD_LEN;
+        int msgLen = RpcConstant.REQ_HEAD_LEN;
         if (!rpcMsg.getMsgType().isHeartbeat() && !Objects.isNull(rpcMsg.getData())) {
             byte[] data = data2Bytes(rpcMsg);
             byteBuf.writeBytes(data);
@@ -50,9 +49,9 @@ public class NettyRpcEncoder extends MessageToByteEncoder<RpcMsg> {
 //        rpcMsg.getCompressType();
 
         Serializer serializer = SingletonFactory.getInstance(KryoSerializer.class);
-        Compress compress = SingletonFactory.getInstance(GzipCompress.class);
-
         byte[] data = serializer.serialize(rpcMsg.getData());
+
+        Compress compress = SingletonFactory.getInstance(GzipCompress.class);
         return compress.compress(data);
     }
 }

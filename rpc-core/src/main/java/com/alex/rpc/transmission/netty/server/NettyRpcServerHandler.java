@@ -3,6 +3,10 @@ package com.alex.rpc.transmission.netty.server;
 import com.alex.rpc.dto.RpcMsg;
 import com.alex.rpc.dto.RpcReq;
 import com.alex.rpc.dto.RpcResp;
+import com.alex.rpc.enums.CompressType;
+import com.alex.rpc.enums.MsgType;
+import com.alex.rpc.enums.SerializeType;
+import com.alex.rpc.enums.VersionType;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -17,8 +21,18 @@ public class NettyRpcServerHandler extends SimpleChannelInboundHandler<RpcMsg> {
         RpcReq rpcReq = (RpcReq) rpcMsg.getData();
 
         RpcResp<String> rpcResp = RpcResp.success(rpcReq.getReqId(), "Simulated response data");
+
+        RpcMsg msg = RpcMsg.builder()
+                .reqId(rpcMsg.getReqId())
+                .version(VersionType.VERSION1)
+                .msgType(MsgType.RPC_RESP)
+                .compressType(CompressType.GZIP)
+                .serializeType(SerializeType.KRYO)
+                .data(rpcResp)
+                .build();
+
         ctx.channel()
-                .writeAndFlush(rpcResp)
+                .writeAndFlush(msg)
                 .addListener(ChannelFutureListener.CLOSE);
     }
 

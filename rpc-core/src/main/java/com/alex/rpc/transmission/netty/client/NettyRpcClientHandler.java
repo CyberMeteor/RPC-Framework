@@ -23,7 +23,7 @@ public class NettyRpcClientHandler extends SimpleChannelInboundHandler<RpcMsg> {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        log.error("Server Exception:", cause);
+        log.error("Client Exception:", cause);
         ctx.close();
     }
 }

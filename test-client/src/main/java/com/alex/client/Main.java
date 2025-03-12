@@ -27,6 +27,6 @@ public class Main {
 //        }
 
         NettyRpcClient rpcClient = new NettyRpcClient();
-        rpcClient.sendReq(RpcReq.builder().interfaceName("request data").build());
+        RpcResp<?> rpcResp = rpcClient.sendReq(RpcReq.builder().interfaceName("request data").build());
     }
 }

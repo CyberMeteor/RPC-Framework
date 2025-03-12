@@ -9,6 +9,6 @@ public class RpcConstant {
 
     public static final String NETTY_RPC_KEY = "RpcResp";
     public static final byte[] RPC_MAGIC_CODE = new byte[]{(byte) 'r', (byte) 'p', (byte) 'c', (byte) 'f'};
-    public static final int RPC_HEAD_LEN = 16;
-    public static final int REQ_MAX_LEN = 1024 * 1024;
+    public static final int REQ_HEAD_LEN = 16;
+    public static final int REQ_MAX_LEN = 1024 * 1024 * 8;
 }

@@ -4,6 +4,7 @@ import com.alex.rpc.config.RpcServiceConfig;
 import com.alex.rpc.constant.RpcConstant;
 import com.alex.rpc.transmission.RpcServer;
 import com.alex.rpc.transmission.netty.codec.NettyRpcDecoder;
+import com.alex.rpc.transmission.netty.codec.NettyRpcEncoder;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -31,9 +32,9 @@ public class NettyRpcServer implements RpcServer {
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         protected void initChannel(SocketChannel channel) throws Exception {
+                            channel.pipeline().addLast(new NettyRpcEncoder());
                             channel.pipeline().addLast(new NettyRpcDecoder());
-                            channel.pipeline().addLast(new NettyRpcDecoder());
-                            channel.pipeline().addLast(new  NettyRpcServerHandler());
+                            channel.pipeline().addLast(new NettyRpcServerHandler());
                         }
                     });
 

@@ -50,7 +50,7 @@ public class NettyRpcDecoder extends LengthFieldBasedFrameDecoder {
 
         int reqId = byteBuf.readInt();
 
-        Object data = readData(byteBuf, msgLen - RpcConstant.REQ_MAX_LEN, msgType);
+        Object data = readData(byteBuf, msgLen - RpcConstant.REQ_HEAD_LEN, msgType);
 
         return RpcMsg.builder()
                 .reqId(reqId)
@@ -73,7 +73,7 @@ public class NettyRpcDecoder extends LengthFieldBasedFrameDecoder {
 
     private Object readData(ByteBuf byteBuf, int dataLen, MsgType msgType) {
         if (msgType.isReq()) {
-            readData(byteBuf, dataLen, RpcReq.class);
+            return readData(byteBuf, dataLen, RpcReq.class);
         }
         return readData(byteBuf, dataLen, RpcResp.class);
     }
@@ -84,7 +84,7 @@ public class NettyRpcDecoder extends LengthFieldBasedFrameDecoder {
         }
 
         byte[] data = new byte[dataLen];
-        byteBuf.readBytes(dataLen);
+        byteBuf.readBytes(data);
 
         Compress compress = SingletonFactory.getInstance(GzipCompress.class);
         data = compress.decompress(data);
