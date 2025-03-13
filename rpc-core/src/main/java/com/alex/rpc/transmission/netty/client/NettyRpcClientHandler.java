@@ -20,7 +20,7 @@ public class NettyRpcClientHandler extends SimpleChannelInboundHandler<RpcMsg> {
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, RpcMsg rpcMsg) throws Exception {
         if (rpcMsg.getMsgType().isHeartbeat()) {
-            log.debug("Received heartbeat from server: {}", rpcMsg);
+//            log.debug("Received heartbeat from server: {}", rpcMsg);
             return;
         }
 

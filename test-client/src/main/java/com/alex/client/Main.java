@@ -11,21 +11,32 @@ import com.alex.rpc.transmission.netty.client.NettyRpcClient;
 import com.alex.rpc.transmission.socket.client.SocketRpcClient;
 import com.alex.rpc.util.ThreadPoolUtils;
 
+import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Main {
     public static void main(String[] args) {
         UserService userService = ProxyUtils.getProxy(UserService.class);
-//        User user = userService.getUser(1L);
-//        System.out.println(user);
-
+        Scanner scanner = new Scanner(System.in);
         ExecutorService executorService = Executors.newFixedThreadPool(20);
-        for (int i = 0; i < 20; i++) {
-            executorService.execute(() -> {
-                User user = userService.getUser(1L);
-                System.out.println(user);
-            });
+
+        while (true) {
+            System.out.println("Please input request times: ");
+            int n = scanner.nextInt();
+            System.out.println("Please input id: ");
+            long id = scanner.nextLong();
+
+            for (int i = 0; i < n; i++) {
+                executorService.execute(() -> {
+                    try {
+                        User user1 = userService.getUser(id);
+                        System.out.println(user1);
+                    } catch (Exception e) {
+                        System.out.println(e.getMessage());
+                    }
+                });
+            }
         }
     }
 }

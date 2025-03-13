@@ -1,11 +1,15 @@
 package com.alex.rpc.proxy;
 
 import cn.hutool.core.util.IdUtil;
+import com.alex.rpc.annotation.Breaker;
 import com.alex.rpc.annotation.Retry;
+import com.alex.rpc.breaker.CircuitBreaker;
+import com.alex.rpc.breaker.CircuitBreakerManager;
 import com.alex.rpc.config.RpcServiceConfig;
 import com.alex.rpc.dto.RpcReq;
 import com.alex.rpc.dto.RpcResp;
 import com.alex.rpc.enums.RpcRespStatus;
+import com.alex.rpc.exception.RpcException;
 import com.alex.rpc.transmission.RpcClient;
 import com.github.rholder.retry.*;
 import lombok.SneakyThrows;
@@ -51,6 +55,28 @@ public class RpcClientProxy implements InvocationHandler {
                 .group(config.getGroup())
                 .build();
 
+        Breaker breaker = method.getAnnotation(Breaker.class);
+        if (Objects.isNull(breaker)) {
+            return sendReqWithRetry(rpcReq, method);
+        }
+
+        CircuitBreaker circuitBreaker = CircuitBreakerManager.get(rpcReq.rpcServiceName(), breaker);
+        if (!circuitBreaker.canReq()) {
+            throw new RpcException("It has been broken by the circuit breaker");
+        }
+
+        try {
+            Object o = sendReqWithRetry(rpcReq, method);
+            circuitBreaker.success();
+            return o;
+        } catch (Exception e) {
+            circuitBreaker.fail();
+            throw e;
+        }
+    }
+
+    @SneakyThrows
+    private Object sendReqWithRetry(RpcReq rpcReq, Method method) {
         Retry retry = method.getAnnotation(Retry.class);
         if (Objects.isNull(retry)) {
             return sendReq(rpcReq);
