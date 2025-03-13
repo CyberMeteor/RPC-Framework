@@ -13,6 +13,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
 
 @Slf4j
 public class SocketRpcClient implements RpcClient {
@@ -27,7 +29,7 @@ public class SocketRpcClient implements RpcClient {
     }
 
     @Override
-    public RpcResp<?> sendReq(RpcReq rpcReq) {
+    public Future<RpcResp<?>> sendReq(RpcReq rpcReq) {
         InetSocketAddress address = serviceDiscovery.lookupService(rpcReq);
 
         try (Socket socket = new Socket(address.getAddress(), address.getPort())) {
@@ -38,7 +40,7 @@ public class SocketRpcClient implements RpcClient {
             ObjectInputStream inputStream = new ObjectInputStream(socket.getInputStream());
             Object o = inputStream.readObject();
 
-            return (RpcResp<?>) o;
+            return CompletableFuture.completedFuture(((RpcResp<?>) o));
         } catch (Exception e) {
             log.error("Fail to send rpc request", e);
         }

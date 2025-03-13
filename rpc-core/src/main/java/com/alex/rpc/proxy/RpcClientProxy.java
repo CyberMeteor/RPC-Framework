@@ -12,6 +12,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Objects;
+import java.util.concurrent.Future;
 
 public class RpcClientProxy implements InvocationHandler {
     private final RpcClient rpcClient;
@@ -47,8 +48,8 @@ public class RpcClientProxy implements InvocationHandler {
                 .group(config.getGroup())
                 .build();
 
-        RpcResp<?> rpcResp = rpcClient.sendReq(rpcReq);
-
+        Future<RpcResp<?>> future = rpcClient.sendReq(rpcReq);
+        RpcResp<?> rpcResp = future.get();
         check(rpcReq, rpcResp);
 
         return rpcResp.getData();

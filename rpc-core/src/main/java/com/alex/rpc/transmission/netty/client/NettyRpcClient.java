@@ -30,6 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -69,7 +70,7 @@ public class NettyRpcClient implements RpcClient {
 
     @SneakyThrows
     @Override
-    public RpcResp<?> sendReq(RpcReq req) {
+    public Future<RpcResp<?>> sendReq(RpcReq req) {
         CompletableFuture<RpcResp<?>> cf = new CompletableFuture<>();
         UnprocessedRpcReq.put(req.getReqId(), cf);
 
@@ -93,7 +94,7 @@ public class NettyRpcClient implements RpcClient {
                     }
                 });
 
-        return cf.get();
+        return cf;
     }
 
     private Channel connect(InetSocketAddress address) {
