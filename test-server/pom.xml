@@ -15,12 +15,6 @@
             <groupId>com.alex</groupId>
             <artifactId>test-api</artifactId>
         </dependency>
-
-        <dependency>
-            <groupId>com.alex</groupId>
-            <artifactId>rpc-core</artifactId>
-        </dependency>
-
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>

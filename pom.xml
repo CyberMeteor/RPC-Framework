@@ -28,6 +28,7 @@
         <curator.version>4.2.0</curator.version>
         <kryo.version>4.0.2</kryo.version>
         <zookeeper.version>3.5.4-beta</zookeeper.version>
+        <retry.version>2.0.0</retry.version>
     </properties>
 
     <dependencies>
@@ -93,6 +94,11 @@
                 <groupId>com.esotericsoftware</groupId>
                 <artifactId>kryo</artifactId>
                 <version>${kryo.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.rholder</groupId>
+                <artifactId>guava-retrying</artifactId>
+                <version>${retry.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
