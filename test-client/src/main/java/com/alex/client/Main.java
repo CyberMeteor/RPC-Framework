@@ -17,7 +17,15 @@ import java.util.concurrent.Executors;
 public class Main {
     public static void main(String[] args) {
         UserService userService = ProxyUtils.getProxy(UserService.class);
-        User user = userService.getUser(1L);
-        System.out.println(user);
+//        User user = userService.getUser(1L);
+//        System.out.println(user);
+
+        ExecutorService executorService = Executors.newFixedThreadPool(20);
+        for (int i = 0; i < 20; i++) {
+            executorService.execute(() -> {
+                User user = userService.getUser(1L);
+                System.out.println(user);
+            });
+        }
     }
 }
