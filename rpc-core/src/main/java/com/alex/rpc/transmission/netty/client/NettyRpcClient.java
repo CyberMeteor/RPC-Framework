@@ -29,6 +29,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.InetSocketAddress;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -37,6 +38,7 @@ public class NettyRpcClient implements RpcClient {
     private static final Bootstrap bootstrap;
     private static final int DEFAULT_CONNECT_TIMEOUT = 5000;
     private final ServiceDiscovery serviceDiscovery;
+    private final ChannelPool channelPool;
 
     public NettyRpcClient() {
         this(SingletonFactory.getInstance(ZkServiceDiscovery.class));
@@ -44,6 +46,7 @@ public class NettyRpcClient implements RpcClient {
 
     public NettyRpcClient(ServiceDiscovery serviceDiscovery) {
         this.serviceDiscovery = serviceDiscovery;
+        this.channelPool = SingletonFactory.getInstance(ChannelPool.class);
     }
 
     static {
@@ -67,12 +70,12 @@ public class NettyRpcClient implements RpcClient {
     @SneakyThrows
     @Override
     public RpcResp<?> sendReq(RpcReq req) {
+        CompletableFuture<RpcResp<?>> cf = new CompletableFuture<>();
+        UnprocessedRpcReq.put(req.getReqId(), cf);
+
         InetSocketAddress address = serviceDiscovery.lookupService(req);
-        ChannelFuture channelFuture = bootstrap.connect(address).sync();
-
-        log.info("NettyRpcClient connected to: {}", address);
-
-        Channel channel = channelFuture.channel();
+        Channel channel = channelPool.get(address, () -> connect(address));
+        log.info("Netty rpc client connected to: {}", address);
 
         RpcMsg rpcMsg = RpcMsg.builder()
                 .version(VersionType.VERSION1)
@@ -82,13 +85,25 @@ public class NettyRpcClient implements RpcClient {
                 .data(req)
                 .build();
 
-        channel.writeAndFlush(rpcMsg).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
+        channel.writeAndFlush(rpcMsg)
+                .addListener((ChannelFutureListener) listener -> {
+                    if (!listener.isSuccess()) {
+                        listener.channel().close();
+                        cf.completeExceptionally(listener.cause());
+                    }
+                });
 
-        // Block and wait until it is closed
-        channel.closeFuture().sync();
+        return cf.get();
+    }
 
-        // Obtain data from server
-        AttributeKey<RpcResp<?>> key = AttributeKey.valueOf(RpcConstant.NETTY_RPC_KEY);
-        return channel.attr(key).get();
+    private Channel connect(InetSocketAddress address) {
+        try {
+            return bootstrap.connect(address)
+                    .sync()
+                    .channel();
+        } catch (InterruptedException e) {
+            log.error("Fail to connect to remote server ", e);
+            throw new RuntimeException(e);
+        }
     }
 }
