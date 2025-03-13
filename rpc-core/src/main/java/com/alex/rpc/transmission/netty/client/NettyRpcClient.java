@@ -23,19 +23,19 @@ import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
+import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.AttributeKey;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.InetSocketAddress;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 public class NettyRpcClient implements RpcClient {
     private static final Bootstrap bootstrap;
     private static final int DEFAULT_CONNECT_TIMEOUT = 5000;
-    private static final AtomicInteger ID_GEN = new AtomicInteger(0);
-
     private final ServiceDiscovery serviceDiscovery;
 
     public NettyRpcClient() {
@@ -55,6 +55,7 @@ public class NettyRpcClient implements RpcClient {
                 .handler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel channel) throws Exception {
+                        channel.pipeline().addLast((new IdleStateHandler(0, 5, 0, TimeUnit.SECONDS)));
                         channel.pipeline().addLast(new NettyRpcDecoder());
                         channel.pipeline().addLast(new NettyRpcEncoder());
                         channel.pipeline().addLast(new NettyRpcClientHandler());
@@ -74,7 +75,6 @@ public class NettyRpcClient implements RpcClient {
         Channel channel = channelFuture.channel();
 
         RpcMsg rpcMsg = RpcMsg.builder()
-                .reqId(ID_GEN.getAndIncrement())
                 .version(VersionType.VERSION1)
                 .serializeType(SerializeType.KRYO)
                 .compressType(CompressType.GZIP)

@@ -13,6 +13,8 @@ import com.alex.rpc.provider.ServiceProvider;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.handler.timeout.IdleState;
+import io.netty.handler.timeout.IdleStateEvent;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -56,6 +58,19 @@ public class NettyRpcServerHandler extends SimpleChannelInboundHandler<RpcMsg> {
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         log.error("Server Exception", cause);
         ctx.close();
+    }
+
+    @Override
+    public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+        boolean isNeedClose = evt instanceof IdleStateEvent && ((IdleStateEvent) evt).state() == IdleState.READER_IDLE;
+
+        if (!isNeedClose) {
+            super.userEventTriggered(ctx, evt);
+            return;
+        }
+
+        log.debug("Server haven't received heartbeat request from client, close channel, address: {}", ctx.channel().remoteAddress());
+        ctx.channel().close();
     }
 
     private RpcResp<?> handleRpcReq(RpcReq rpcReq) {
