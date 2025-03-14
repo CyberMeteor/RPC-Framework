@@ -10,6 +10,7 @@ import com.alex.rpc.enums.VersionType;
 import com.alex.rpc.factory.SingletonFactory;
 import com.alex.rpc.handler.RpcReqHandler;
 import com.alex.rpc.provider.ServiceProvider;
+import com.alex.rpc.util.ConfigUtils;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -39,13 +40,13 @@ public class NettyRpcServerHandler extends SimpleChannelInboundHandler<RpcMsg> {
             RpcReq rpcReq = (RpcReq) rpcMsg.getData();
             data = handleRpcReq(rpcReq);
         }
-
+        String serializer = ConfigUtils.getRpcConfig().getSerializer();
         RpcMsg msg = RpcMsg.builder()
                 .reqId(rpcMsg.getReqId())
                 .version(VersionType.VERSION1)
                 .msgType(msgType)
                 .compressType(CompressType.GZIP)
-                .serializeType(SerializeType.KRYO)
+                .serializeType(SerializeType.from(serializer))
                 .data(data)
                 .build();
 

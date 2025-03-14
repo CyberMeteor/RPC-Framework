@@ -11,9 +11,11 @@ import com.alex.rpc.enums.VersionType;
 import com.alex.rpc.factory.SingletonFactory;
 import com.alex.rpc.registry.ServiceDiscovery;
 import com.alex.rpc.registry.impl.ZkServiceDiscovery;
+import com.alex.rpc.spi.CustomLoader;
 import com.alex.rpc.transmission.RpcClient;
 import com.alex.rpc.transmission.netty.codec.NettyRpcDecoder;
 import com.alex.rpc.transmission.netty.codec.NettyRpcEncoder;
+import com.alex.rpc.util.ConfigUtils;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -78,9 +80,11 @@ public class NettyRpcClient implements RpcClient {
         Channel channel = channelPool.get(address, () -> connect(address));
         log.info("Netty rpc client connected to: {}", address);
 
+        String serializer = ConfigUtils.getRpcConfig().getSerializer();
+
         RpcMsg rpcMsg = RpcMsg.builder()
                 .version(VersionType.VERSION1)
-                .serializeType(SerializeType.KRYO)
+                .serializeType(SerializeType.from(serializer))
                 .compressType(CompressType.GZIP)
                 .msgType(MsgType.RPC_REQ)
                 .data(req)

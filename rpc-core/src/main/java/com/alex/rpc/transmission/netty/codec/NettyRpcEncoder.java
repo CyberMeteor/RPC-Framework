@@ -6,7 +6,7 @@ import com.alex.rpc.constant.RpcConstant;
 import com.alex.rpc.dto.RpcMsg;
 import com.alex.rpc.factory.SingletonFactory;
 import com.alex.rpc.serialize.Serializer;
-import com.alex.rpc.serialize.impl.KryoSerializer;
+import com.alex.rpc.spi.CustomLoader;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
@@ -45,11 +45,9 @@ public class NettyRpcEncoder extends MessageToByteEncoder<RpcMsg> {
     }
 
     private byte[] data2Bytes(RpcMsg rpcMsg) {
-        // TODO: get Serialize type and Compress type
-//        rpcMsg.getSerializeType();
-//        rpcMsg.getCompressType();
+        String serializerTypeStr = rpcMsg.getSerializeType().getDesc();
 
-        Serializer serializer = SingletonFactory.getInstance(KryoSerializer.class);
+        Serializer serializer = CustomLoader.getLoader(Serializer.class).get(serializerTypeStr);
         byte[] data = serializer.serialize(rpcMsg.getData());
 
         Compress compress = SingletonFactory.getInstance(GzipCompress.class);

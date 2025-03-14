@@ -24,25 +24,11 @@ import java.util.List;
 public class Main {
     public static void main(String[] args) {
         BasicConfigurator.configure();
-//        RpcServiceConfig config = new RpcServiceConfig(new UserServiceImpl());
-//
-//        RpcServer rpcServer = new NettyRpcServer();
-//        rpcServer.publishService(config);
-//
-//        rpcServer.start();
+        RpcServiceConfig config = new RpcServiceConfig(new UserServiceImpl());
 
-        LoadBalance loadBalance = SingletonFactory.getInstance(ConsistentHashLoadBalance.class);
+        RpcServer rpcServer = new NettyRpcServer();
+        rpcServer.publishService(config);
 
-        List<String> list = ListUtil.of("ip1:port1", "ip2:port2", "ip3:port3", "ip4:port4");
-        RpcReq rpcReq = RpcReq.builder()
-                .interfaceName("test")
-                .group("group1")
-                .version("version1")
-                .build();
-
-        for (int i = 0; i < 10; i++) {
-            String select = loadBalance.select(list, rpcReq);
-            System.out.println(select);
-        }
+        rpcServer.start();
     }
 }

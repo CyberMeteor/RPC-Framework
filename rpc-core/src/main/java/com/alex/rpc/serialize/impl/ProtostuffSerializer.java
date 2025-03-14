@@ -5,7 +5,9 @@ import io.protostuff.LinkedBuffer;
 import io.protostuff.ProtostuffIOUtil;
 import io.protostuff.Schema;
 import io.protostuff.runtime.RuntimeSchema;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class ProtostuffSerializer implements Serializer {
     private static final LinkedBuffer buffer = LinkedBuffer.allocate(LinkedBuffer.DEFAULT_BUFFER_SIZE);
 
@@ -15,6 +17,7 @@ public class ProtostuffSerializer implements Serializer {
 
         Schema schema = RuntimeSchema.getSchema(aClass);
         try {
+            log.info("===============Use Protostuff Serializer ===============");
             return ProtostuffIOUtil.toByteArray(obj, schema, buffer);
         } finally {
             buffer.clear();
@@ -27,7 +30,7 @@ public class ProtostuffSerializer implements Serializer {
 
         T t = schema.newMessage();
         ProtostuffIOUtil.mergeFrom(data, t, schema);
-
+        log.info("===============Use Protostuff Deserializer ===============");
         return t;
     }
 }

@@ -30,6 +30,8 @@ public class KryoSerializer implements Serializer {
             kryo.writeObject(output, obj);
             output.flush();
 
+            log.info("==============Use Kryo Serializer ===============");
+
             return oos.toByteArray();
         } catch (Exception e) {
             log.error("Kryo serialize failed", e);
@@ -45,6 +47,7 @@ public class KryoSerializer implements Serializer {
              Input input = new Input(is)) {
 
             Kryo kryo = KRYO_THREAD_LOCAL.get();
+            log.info("==============Use Kryo Deserializer ===============");
             return kryo.readObject(input, clazz);
         } catch (Exception e) {
             log.error("Kryo deserialize failed", e);
