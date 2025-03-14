@@ -7,6 +7,7 @@ import com.alex.rpc.config.RpcServiceConfig;
 import com.alex.rpc.dto.RpcReq;
 import com.alex.rpc.factory.SingletonFactory;
 import com.alex.rpc.loadbalance.LoadBalance;
+import com.alex.rpc.loadbalance.impl.ConsistentHashLoadBalance;
 import com.alex.rpc.loadbalance.impl.RoundLoadBalance;
 import com.alex.rpc.proxy.RpcClientProxy;
 import com.alex.rpc.serialize.Serializer;
@@ -30,12 +31,17 @@ public class Main {
 //
 //        rpcServer.start();
 
-        LoadBalance loadBalance = SingletonFactory.getInstance(RoundLoadBalance.class);
+        LoadBalance loadBalance = SingletonFactory.getInstance(ConsistentHashLoadBalance.class);
 
         List<String> list = ListUtil.of("ip1:port1", "ip2:port2", "ip3:port3", "ip4:port4");
+        RpcReq rpcReq = RpcReq.builder()
+                .interfaceName("test")
+                .group("group1")
+                .version("version1")
+                .build();
 
         for (int i = 0; i < 10; i++) {
-            String select = loadBalance.select(list);
+            String select = loadBalance.select(list, rpcReq);
             System.out.println(select);
         }
     }
